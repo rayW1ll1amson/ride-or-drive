@@ -49,7 +49,6 @@
 
     .card { background: var(--card); border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 0.5px solid rgba(0,0,0,0.05); }
     .btn-toptalks { background: var(--top-talks); color: white; border-radius: 18px; font-weight: 700; transition: all 0.2s; }
-    .btn-toptalks:active { transform: scale(0.96); opacity: 0.9; }
     
     .progress-container { height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden; }
     [data-theme="dark"] .progress-container { background: rgba(255,255,255,0.1); }
@@ -57,6 +56,8 @@
 
     .history-card { min-width: 140px; background: var(--card); border-radius: 16px; padding: 12px; flex-shrink: 0; border: 0.5px solid rgba(0,0,0,0.05); }
     .history-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+    
+    .timer-btn { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); }
   </style>
 </head>
 <body data-theme="light">
@@ -80,17 +81,18 @@
       <p class="text-xs font-medium opacity-60 italic">Transform your commute from dead time into meaningful moments.</p>
     </div>
 
-    <div class="px-6 mb-6">
-      <div class="card p-4">
-        <div class="flex justify-between items-end mb-2">
-          <p class="text-[9px] font-black uppercase tracking-widest opacity-40">Meaningful Moments Progress</p>
-          <p id="progress-text" class="text-[11px] font-bold text-blue-500">0.0 / 5.0h</p>
-        </div>
-        <div class="progress-container"><div id="progress-fill" class="progress-fill" style="width: 0%"></div></div>
-      </div>
-    </div>
-
     <div class="px-6 flex-1 flex flex-col overflow-y-auto pb-32">
+      <div class="grid grid-cols-2 gap-4 mb-8">
+        <button onclick="loadRole('driver')" class="card p-5 text-left active:bg-gray-50 dark:active:bg-gray-900 transition">
+          <span class="text-4xl block mb-2">🚗</span>
+          <span class="font-bold text-lg">Driver</span>
+        </button>
+        <button onclick="loadRole('passenger')" class="card p-5 text-left active:bg-gray-50 dark:active:bg-gray-900 transition">
+          <span class="text-4xl block mb-2">💺</span>
+          <span class="font-bold text-lg">Rider</span>
+        </button>
+      </div>
+
       <div id="news-headline-container" class="mb-4 card p-4 !bg-[#E5E5EA] dark:!bg-[#2C2C2E] border-l-4 border-blue-500 active:bg-gray-300 dark:active:bg-gray-700 transition cursor-pointer" onclick="fetchAndOpenNews()">
         <p class="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-1">Breaking News</p>
         <h3 id="news-text" class="text-sm font-bold leading-tight !text-black dark:!text-white">Syncing today's top story...</h3>
@@ -106,15 +108,25 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-2 gap-4 mb-8">
-        <button onclick="loadRole('driver')" class="card p-5 text-left active:bg-gray-50 dark:active:bg-gray-900 transition">
-          <span class="text-4xl block mb-2">🚗</span>
-          <span class="font-bold text-lg">Driver</span>
-        </button>
-        <button onclick="loadRole('passenger')" class="card p-5 text-left active:bg-gray-50 dark:active:bg-gray-900 transition">
-          <span class="text-4xl block mb-2">💺</span>
-          <span class="font-bold text-lg">Rider</span>
-        </button>
+      <div class="mb-8">
+        <div class="card p-4">
+          <div class="flex justify-between items-end mb-2">
+            <p class="text-[9px] font-black uppercase tracking-widest opacity-40">Meaningful Moments Progress</p>
+            <p id="progress-text" class="text-[11px] font-bold text-blue-500">0.0 / 5.0h</p>
+          </div>
+          <div class="progress-container"><div id="progress-fill" class="progress-fill" style="width: 0%"></div></div>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <div class="card p-4 flex items-center justify-between">
+          <p class="text-[9px] font-black uppercase tracking-widest opacity-40">Sleep Timer</p>
+          <div class="flex gap-2">
+            <button onclick="setSleepTimer(15)" class="timer-btn active:bg-blue-500 active:text-white transition">15m</button>
+            <button onclick="setSleepTimer(30)" class="timer-btn active:bg-blue-500 active:text-white transition">30m</button>
+            <button onclick="setSleepTimer(60)" class="timer-btn active:bg-blue-500 active:text-white transition">60m</button>
+          </div>
+        </div>
       </div>
 
       <div id="history-section" class="mb-10 hidden">
@@ -149,11 +161,11 @@
   </div>
 
   <nav class="glass-tab fixed bottom-0 left-0 right-0 flex justify-around items-center pt-3 pb-[calc(12px+var(--safe-bottom))] z-50">
-    <button onclick="navToTab('screen-today')" id="tab-today-btn" class="flex flex-col items-center gap-1 text-blue-600 hit-target">
+    <button onclick="navToTab('screen-today')" id="tab-today-btn" class="flex flex-col items-center gap-1 text-blue-600">
       <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       <span class="text-[10px] font-bold">Home</span>
     </button>
-    <button onclick="navToTab('screen-explore')" id="tab-explore-btn" class="flex flex-col items-center gap-1 text-gray-400 hit-target">
+    <button onclick="navToTab('screen-explore')" id="tab-explore-btn" class="flex flex-col items-center gap-1 text-gray-400">
       <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 7h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
       <span class="text-[10px] font-bold">Explore</span>
     </button>
@@ -163,53 +175,76 @@
     const scrapingTargets = {
       driver: {
         'Hands-Free Productivity': [
-          { label: 'Immersive Audiobooks', query: 'classic lit audiobook immersive', type: 'podcast', icon: '🎧' },
+          { label: 'Immersive Audiobooks', query: 'classic lit audiobook immersive', icon: '🎧' },
           { label: 'Internet Archive', url: 'https://archive.org/details/audio_bookspoetry', direct: true, icon: '🏛️' },
-          { label: 'Educational Podcasts', query: 'ted talks', icon: '🎙️' },
-          { label: 'Language Transfer', query: 'language learning', icon: '🌍' }
+          { label: 'Educational Podcasts', query: 'ted talks', icon: '🎙️' }
         ],
-        'Life Admin': [
-          { label: 'Siri Dictation', url: 'siri://', direct: true, icon: '🎙️' },
-          { label: 'Otter.ai', url: 'https://otter.ai', direct: true, icon: '🗣️' }
-        ]
+        'Life Admin': [{ label: 'Siri Dictation', url: 'siri://', direct: true, icon: '🎙️' }]
       },
       passenger: {
-        'Visual Learning': [
-          { label: 'Khan Academy', url: 'https://khanacademy.org', direct: true, icon: '🏫' },
-          { label: 'Coursera', url: 'https://www.coursera.org', direct: true, icon: '🎓' }
-        ],
-        'Productivity': [
-          { label: 'Google Suite', url: 'https://docs.google.com', direct: true, icon: '📊' },
-          { label: 'Notion', url: 'https://www.notion.so', direct: true, icon: '📝' }
-        ],
-        'Entertainment': [
-          { label: 'Pluto TV', url: 'https://pluto.tv', direct: true, icon: '📺' },
-          { label: 'Plex TV', url: 'https://www.plex.tv', direct: true, icon: '📼' },
-          { label: 'Kanopy', url: 'https://www.kanopy.com', direct: true, icon: '📽️' }
-        ]
+        'Visual Learning': [{ label: 'Khan Academy', url: 'https://khanacademy.org', direct: true, icon: '🏫' }],
+        'Productivity': [{ label: 'Google Suite', url: 'https://docs.google.com', direct: true, icon: '📊' }],
+        'Entertainment': [{ label: 'Pluto TV', url: 'https://pluto.tv', direct: true, icon: '📺' }]
       }
     };
 
     function updateDateTime() {
       const now = new Date();
-      document.getElementById('live-date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour12: true });
+      document.getElementById('live-date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     }
     setInterval(updateDateTime, 1000);
     updateDateTime();
 
-    function updateProgress() {
-      let mins = parseInt(localStorage.getItem('rd_mins') || '0');
-      let hrs = (mins / 60).toFixed(1);
-      document.getElementById('progress-text').innerText = `${hrs} / 5.0h`;
-      document.getElementById('progress-fill').style.width = Math.min((mins / 300) * 100, 100) + '%';
+    function setSleepTimer(mins) {
+      const island = document.getElementById('island');
+      const content = document.getElementById('island-content');
+      island.classList.add('active');
+      content.innerHTML = `⏱️ TIMER SET: ${mins}m`;
+      setTimeout(() => { island.classList.remove('active'); }, 2000);
     }
 
-    function clearSystemData() {
-      if(confirm("Clear commute history and weekly progress?")) {
-        localStorage.clear();
-        location.reload();
+    function toggleNightMode() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
+    function clearSystemData() { if(confirm("Reset commute data?")) { localStorage.clear(); location.reload(); } }
+    function launchTopTalks() { loadRole('driver', 'global leadership'); }
+
+    function openLink(url, title, icon) {
+      let history = JSON.parse(localStorage.getItem('rd_history') || '[]');
+      history = history.filter(i => i.url !== url);
+      history.unshift({ url, title, icon: icon || '🎧' });
+      localStorage.setItem('rd_history', JSON.stringify(history.slice(0, 5)));
+      let mins = parseInt(localStorage.getItem('rd_mins') || '0');
+      localStorage.setItem('rd_mins', mins + 30);
+      updateTodayUI();
+      setTimeout(() => { window.open(url, '_blank'); }, 400);
+    }
+
+    function resumeLastSession() {
+      const history = JSON.parse(localStorage.getItem('rd_history') || '[]');
+      if (history.length > 0) openLink(history[0].url, history[0].title, history[0].icon);
+      else openLink('https://librivox.org', 'LibriVox Audio', '📚');
+    }
+
+    function updateTodayUI() {
+      let mins = parseInt(localStorage.getItem('rd_mins') || '0');
+      document.getElementById('progress-text').innerText = `${(mins/60).toFixed(1)} / 5.0h`;
+      document.getElementById('progress-fill').style.width = Math.min((mins/300)*100, 100) + '%';
+      
+      const history = JSON.parse(localStorage.getItem('rd_history') || '[]');
+      if (history.length > 0) {
+        document.getElementById('resume-title').innerText = history[0].title;
+        document.getElementById('resume-icon').innerText = history[0].icon;
+        const hSection = document.getElementById('history-section');
+        if (history.length > 1) {
+          hSection.classList.remove('hidden');
+          document.getElementById('history-list').innerHTML = history.slice(1).map(item => `<div class="history-card" onclick="openLink('${item.url}', '${item.title}', '${item.icon}')"><span class="text-2xl block mb-2">${item.icon}</span><p class="text-[10px] font-bold uppercase truncate">${item.title}</p></div>`).join('');
+        }
       }
+    }
+
+    function navToTab(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
 
     async function fetchTopNews() {
@@ -221,95 +256,18 @@
         window.latestNewsUrl = story.trackViewUrl;
       } catch (e) {
         document.getElementById('news-text').innerText = "Top Story: Digital Transformation 2026 Insights";
-        window.latestNewsUrl = "https://news.google.com";
       }
     }
     fetchTopNews();
+    function fetchAndOpenNews() { openLink(window.latestNewsUrl, document.getElementById('news-text').innerText, '📰'); }
 
-    function fetchAndOpenNews() {
-      openLink(window.latestNewsUrl, document.getElementById('news-text').innerText, '📰');
-    }
-
-    function toggleNightMode() {
-      const b = document.body;
-      const current = b.getAttribute('data-theme');
-      b.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
-    }
-
-    function haptic() { if (window.navigator.vibrate) window.navigator.vibrate(20); }
-
-    function launchTopTalks() {
-      haptic();
-      const island = document.getElementById('island');
-      island.classList.add('active');
-      document.getElementById('island-content').innerHTML = `⚙ SYNCING TOP TALKS...`;
-      setTimeout(() => {
-        loadRole('driver', 'global leadership and technology insights');
-        setTimeout(() => island.classList.remove('active'), 1500);
-      }, 1200);
-    }
-
-    function openLink(url, title, icon) {
-      haptic();
-      const island = document.getElementById('island');
-      island.classList.add('active');
-      document.getElementById('island-content').innerHTML = `▶ ${title.substring(0, 12)}...`;
-      
-      let history = JSON.parse(localStorage.getItem('rd_history') || '[]');
-      history = history.filter(i => i.url !== url);
-      history.unshift({ url, title, icon: icon || '🎧' });
-      localStorage.setItem('rd_history', JSON.stringify(history.slice(0, 5)));
-      
-      let mins = parseInt(localStorage.getItem('rd_mins') || '0');
-      localStorage.setItem('rd_mins', mins + 30);
-      
-      updateTodayUI();
-      setTimeout(() => { window.open(url, '_blank'); }, 400);
-      setTimeout(() => { island.classList.remove('active'); }, 5000);
-    }
-
-    function resumeLastSession() {
-      const history = JSON.parse(localStorage.getItem('rd_history') || '[]');
-      if (history.length > 0) openLink(history[0].url, history[0].title, history[0].icon);
-      else openLink('https://librivox.org', 'LibriVox Audio', '📚');
-    }
-
-    function updateTodayUI() {
-      updateProgress();
-      const history = JSON.parse(localStorage.getItem('rd_history') || '[]');
-      if (history.length > 0) {
-        document.getElementById('resume-title').innerText = history[0].title;
-        document.getElementById('resume-icon').innerText = history[0].icon;
-        const hSection = document.getElementById('history-section');
-        const hList = document.getElementById('history-list');
-        if (history.length > 1) {
-          hSection.classList.remove('hidden');
-          hList.innerHTML = history.slice(1).map(item => `
-            <div class="history-card active:scale-95 transition" onclick="openLink('${item.url}', '${item.title}', '${item.icon}')">
-              <span class="text-2xl block mb-2">${item.icon}</span>
-              <p class="text-[10px] font-bold uppercase truncate">${item.title}</p>
-            </div>`).join('');
-        }
-      }
-    }
-
-    function navToTab(id) {
-      haptic();
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      const isToday = id === 'screen-today';
-      document.getElementById('tab-today-btn').className = isToday ? 'flex flex-col items-center gap-1 text-blue-600' : 'flex flex-col items-center gap-1 text-gray-400';
-      document.getElementById('tab-explore-btn').className = !isToday ? 'flex flex-col items-center gap-1 text-blue-600' : 'flex flex-col items-center gap-1 text-gray-400';
-      if(isToday) updateTodayUI();
-    }
-
-    function loadRole(role, customQuery = null) {
+    function loadRole(role, query = null) {
       document.getElementById('explore-header').innerText = `${role.toUpperCase()} MODE`;
-      scrapeContent(role, customQuery);
+      scrapeContent(role, query);
       navToTab('screen-explore');
     }
 
-    async function scrapeContent(role, customQuery) {
+    async function scrapeContent(role, query) {
       const container = document.getElementById('explore-content');
       container.innerHTML = `<div class="p-8 text-center opacity-40 animate-pulse italic">Syncing live resources...</div>`;
       let finalHTML = '';
@@ -318,16 +276,15 @@
         let catHTML = `<div class="card overflow-hidden mb-6"><div class="p-4 border-b border-gray-50 bg-gray-50/30 font-bold text-xs uppercase tracking-widest">${cat}</div>`;
         for (const target of subCats) {
           if (target.direct) {
-            catHTML += `<button onclick="openLink('${target.url}', '${target.label}', '${target.icon}')" class="w-full h-12 px-4 text-left text-sm font-medium opacity-80 active:bg-gray-50 border-b border-gray-50 last:border-0">${target.label} ↗</button>`;
+            catHTML += `<button onclick="openLink('${target.url}', '${target.label}', '${target.icon}')" class="w-full h-12 px-4 text-left text-sm font-medium opacity-80 active:bg-gray-50 border-b border-gray-100 last:border-0">${target.label} ↗</button>`;
           } else {
             try {
-              const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://itunes.apple.com/search?term=${encodeURIComponent(target.query)}&entity=podcast&limit=10`)}`);
+              const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://itunes.apple.com/search?term=${encodeURIComponent(target.query || query)}&entity=podcast&limit=10`)}`);
               const data = await res.json();
-              const items = JSON.parse(data.contents).results;
-              items.forEach(item => {
-                catHTML += `<button onclick="openLink('${item.trackViewUrl}', '${item.trackName}', '${target.icon}')" class="w-full h-12 px-4 text-left text-xs font-medium opacity-80 active:bg-gray-50 truncate border-b border-gray-50 last:border-0"><span>${item.trackName}</span></button>`;
+              JSON.parse(data.contents).results.forEach(item => {
+                catHTML += `<button onclick="openLink('${item.trackViewUrl}', '${item.trackName}', '${target.icon}')" class="w-full h-12 px-4 text-left text-xs font-medium opacity-80 truncate border-b border-gray-100 last:border-0"><span>${item.trackName}</span></button>`;
               });
-            } catch (e) { catHTML += `<div class="p-2 text-[10px] opacity-40 italic">Offline mode active</div>`; }
+            } catch (e) { catHTML += `<div class="p-2 text-[10px] opacity-40 italic">Offline mode</div>`; }
           }
         }
         catHTML += `</div>`;
