@@ -51,6 +51,11 @@
     .btn-toptalks { background: var(--top-talks); color: white; border-radius: 18px; font-weight: 700; transition: all 0.2s; }
     .btn-toptalks:active { transform: scale(0.96); opacity: 0.9; }
     
+    /* Progress Bar */
+    .progress-container { height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden; }
+    [data-theme="dark"] .progress-container { background: rgba(255,255,255,0.1); }
+    .progress-fill { height: 100%; background: var(--system-blue); transition: width 1s ease-in-out; }
+
     .history-card { min-width: 140px; background: var(--card); border-radius: 16px; padding: 12px; flex-shrink: 0; border: 0.5px solid rgba(0,0,0,0.05); }
     .history-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
   </style>
@@ -64,22 +69,42 @@
   <div id="screen-today" class="screen active">
     <div class="px-6 pt-6 flex justify-between items-center">
       <button onclick="toggleNightMode()" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-lg shadow-sm active:scale-90 transition">🌓</button>
-      <div id="live-clock" class="text-[10px] font-bold opacity-40 uppercase tracking-widest text-right">00:00:00</div>
+      <div id="live-clock" class="text-[10px] font-bold opacity-40 uppercase tracking-widest text-right">00:00:00 AM</div>
     </div>
     
-    <div class="px-6 pt-4 pb-6">
+    <div class="px-6 pt-4 pb-4">
       <h1 class="text-3xl font-extrabold tracking-tight mb-1">Today</h1>
       <p id="live-date" class="text-[11px] font-bold opacity-30 uppercase tracking-widest mb-2">January 9, 2026</p>
-      <p class="text-xs font-medium opacity-60 leading-relaxed italic">Transform your commute from dead time into meaningful moments.</p>
+      <p class="text-xs font-medium opacity-60 italic">Transform your commute from dead time into meaningful moments.</p>
+    </div>
+
+    <div class="px-6 mb-6">
+      <div class="card p-4">
+        <div class="flex justify-between items-end mb-2">
+          <p class="text-[9px] font-black uppercase tracking-widest opacity-40">Meaningful Moments Progress</p>
+          <p id="progress-text" class="text-[11px] font-bold text-blue-500">0.0 / 5.0h</p>
+        </div>
+        <div class="progress-container"><div id="progress-fill" class="progress-fill" style="width: 0%"></div></div>
+      </div>
     </div>
 
     <div class="px-6 flex-1 flex flex-col overflow-y-auto pb-32">
-      <div id="news-headline-container" class="mb-6 card p-4 border-l-4 border-blue-500 active:bg-gray-50 dark:active:bg-gray-900 transition cursor-pointer" onclick="fetchAndOpenNews()">
-        <p class="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-1">Breaking News Scraper</p>
+      <div id="news-headline-container" class="mb-4 card p-4 border-l-4 border-blue-500 active:bg-gray-50 dark:active:bg-gray-900 transition cursor-pointer" onclick="fetchAndOpenNews()">
+        <p class="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-1">Breaking News</p>
         <h3 id="news-text" class="text-sm font-bold leading-tight">Syncing today's top story...</h3>
       </div>
 
-      <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="mb-8">
+        <button onclick="launchTopTalks()" class="btn-toptalks w-full h-20 shadow-lg flex items-center justify-between px-8 group">
+          <div class="text-left">
+            <h2 class="text-xl font-black uppercase tracking-tighter">Top Talks</h2>
+            <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Global Insights Feed</p>
+          </div>
+          <span class="text-3xl group-active:rotate-12 transition-transform">🌍</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-8">
         <button onclick="loadRole('driver')" class="card p-5 text-left active:bg-gray-50 dark:active:bg-gray-900 transition">
           <span class="text-4xl block mb-2">🚗</span>
           <span class="font-bold text-lg">Driver</span>
@@ -87,16 +112,6 @@
         <button onclick="loadRole('passenger')" class="card p-5 text-left active:bg-gray-50 dark:active:bg-gray-900 transition">
           <span class="text-4xl block mb-2">💺</span>
           <span class="font-bold text-lg">Rider</span>
-        </button>
-      </div>
-
-      <div class="mb-10">
-        <button onclick="launchTopTalks()" class="btn-toptalks w-full h-20 shadow-lg flex items-center justify-between px-8 group">
-          <div class="text-left">
-            <h2 class="text-xl font-black uppercase tracking-tighter">Top Talks</h2>
-            <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Global Insights Feed</p>
-          </div>
-          <span class="text-3xl group-active:rotate-12 transition-transform">🌍</span>
         </button>
       </div>
 
@@ -172,10 +187,17 @@
     function updateDateTime() {
       const now = new Date();
       document.getElementById('live-date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-      document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+      document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour12: true });
     }
     setInterval(updateDateTime, 1000);
     updateDateTime();
+
+    function updateProgress() {
+      let mins = parseInt(localStorage.getItem('rd_mins') || '0');
+      let hrs = (mins / 60).toFixed(1);
+      document.getElementById('progress-text').innerText = `${hrs} / 5.0h`;
+      document.getElementById('progress-fill').style.width = Math.min((mins / 300) * 100, 100) + '%';
+    }
 
     async function fetchTopNews() {
       try {
@@ -185,7 +207,7 @@
         document.getElementById('news-text').innerText = story.trackName;
         latestNewsUrl = story.trackViewUrl;
       } catch (e) {
-        document.getElementById('news-text').innerText = "Top Global Story: World Economic Forum 2026 Keynote";
+        document.getElementById('news-text').innerText = "Top Story: Digital Transformation 2026 Insights";
       }
     }
     fetchTopNews();
@@ -219,10 +241,16 @@
       const island = document.getElementById('island');
       island.classList.add('active');
       document.getElementById('island-content').innerHTML = `▶ ${title.substring(0, 12)}...`;
+      
       let history = JSON.parse(localStorage.getItem('rd_history') || '[]');
       history = history.filter(i => i.url !== url);
       history.unshift({ url, title, icon: icon || '🎧' });
       localStorage.setItem('rd_history', JSON.stringify(history.slice(0, 5)));
+      
+      // Update Goal Tracking (Assume 30 mins per session launch)
+      let mins = parseInt(localStorage.getItem('rd_mins') || '0');
+      localStorage.setItem('rd_mins', mins + 30);
+      
       updateTodayUI();
       setTimeout(() => { window.open(url, '_blank'); }, 400);
       setTimeout(() => { island.classList.remove('active'); }, 5000);
@@ -235,6 +263,7 @@
     }
 
     function updateTodayUI() {
+      updateProgress();
       const history = JSON.parse(localStorage.getItem('rd_history') || '[]');
       if (history.length > 0) {
         document.getElementById('resume-title').innerText = history[0].title;
