@@ -13,7 +13,7 @@
       --card: #FFFFFF;
       --text: #000000;
       --system-blue: #007AFF;
-      --dev-orange: #FF9500;
+      --top-talks: #FF9500;
       --safe-top: env(safe-area-inset-top);
       --safe-bottom: env(safe-area-inset-bottom);
     }
@@ -48,8 +48,8 @@
     .island.active { width: 240px; background: #1a1a1e; }
 
     .card { background: var(--card); border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 0.5px solid rgba(0,0,0,0.05); }
-    .btn-devtalks { background: var(--dev-orange); color: white; border-radius: 18px; font-weight: 700; transition: all 0.2s; }
-    .btn-devtalks:active { transform: scale(0.96); opacity: 0.9; }
+    .btn-toptalks { background: var(--top-talks); color: white; border-radius: 18px; font-weight: 700; transition: all 0.2s; }
+    .btn-toptalks:active { transform: scale(0.96); opacity: 0.9; }
     
     .history-card { min-width: 140px; background: var(--card); border-radius: 16px; padding: 12px; flex-shrink: 0; border: 0.5px solid rgba(0,0,0,0.05); }
     .history-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
@@ -69,11 +69,16 @@
     
     <div class="px-6 pt-4 pb-6">
       <h1 class="text-3xl font-extrabold tracking-tight mb-1">Today</h1>
-      <p id="live-date" class="text-[11px] font-bold opacity-30 uppercase tracking-widest mb-2">January 1, 2026</p>
+      <p id="live-date" class="text-[11px] font-bold opacity-30 uppercase tracking-widest mb-2">January 9, 2026</p>
       <p class="text-xs font-medium opacity-60 leading-relaxed italic">Transform your commute from dead time into meaningful moments.</p>
     </div>
 
     <div class="px-6 flex-1 flex flex-col overflow-y-auto pb-32">
+      <div id="news-headline-container" class="mb-6 card p-4 border-l-4 border-blue-500 active:bg-gray-50 dark:active:bg-gray-900 transition cursor-pointer" onclick="fetchAndOpenNews()">
+        <p class="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-1">Breaking News Scraper</p>
+        <h3 id="news-text" class="text-sm font-bold leading-tight">Syncing today's top story...</h3>
+      </div>
+
       <div class="grid grid-cols-2 gap-4 mb-6">
         <button onclick="loadRole('driver')" class="card p-5 text-left active:bg-gray-50 dark:active:bg-gray-900 transition">
           <span class="text-4xl block mb-2">🚗</span>
@@ -86,18 +91,13 @@
       </div>
 
       <div class="mb-10">
-        <button onclick="launchDevTalks()" class="btn-devtalks w-full h-20 shadow-lg flex items-center justify-between px-8 group">
+        <button onclick="launchTopTalks()" class="btn-toptalks w-full h-20 shadow-lg flex items-center justify-between px-8 group">
           <div class="text-left">
-            <h2 class="text-xl font-black uppercase tracking-tighter">DevTalks</h2>
-            <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Live IT Engineering Feed</p>
+            <h2 class="text-xl font-black uppercase tracking-tighter">Top Talks</h2>
+            <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Global Insights Feed</p>
           </div>
-          <span class="text-3xl group-active:rotate-12 transition-transform">💻</span>
+          <span class="text-3xl group-active:rotate-12 transition-transform">🌍</span>
         </button>
-      </div>
-
-      <div id="bookmark-section" class="mb-10 hidden">
-        <h3 class="text-[11px] font-bold opacity-40 uppercase tracking-widest mb-4">Watch Later</h3>
-        <div id="bookmark-list" class="history-scroll"></div>
       </div>
 
       <div id="history-section" class="mb-10 hidden">
@@ -132,11 +132,11 @@
   </div>
 
   <nav class="glass-tab fixed bottom-0 left-0 right-0 flex justify-around items-center pt-3 pb-[calc(12px+var(--safe-bottom))] z-50">
-    <button onclick="navToTab('screen-today')" id="tab-today-btn" class="flex flex-col items-center gap-1 text-blue-600 hit-target">
+    <button onclick="navToTab('screen-today')" id="tab-today-btn" class="flex flex-col items-center gap-1 text-blue-600">
       <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       <span class="text-[10px] font-bold">Today</span>
     </button>
-    <button onclick="navToTab('screen-explore')" id="tab-explore-btn" class="flex flex-col items-center gap-1 text-gray-400 hit-target">
+    <button onclick="navToTab('screen-explore')" id="tab-explore-btn" class="flex flex-col items-center gap-1 text-gray-400">
       <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 7h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
       <span class="text-[10px] font-bold">Explore</span>
     </button>
@@ -147,39 +147,52 @@
       driver: {
         'Hands-Free Productivity': [
           { label: 'Audiobooks', query: 'literature audiobook', icon: '📚' },
-          { label: 'Educational Podcasts', query: 'ted talks', icon: '🎙️' },
-          { label: 'Language Transfer', query: 'language learning', icon: '🌍' }
+          { label: 'Educational Podcasts', query: 'ted talks', icon: '🎙️' }
         ],
-        'Life Admin': [{ label: 'Voice Dictation', url: 'https://otter.ai', direct: true, icon: '🗣️' }],
-        'Wellbeing': [{ label: 'Ambient Focus', query: 'lofi study', icon: '🎵' }]
+        'Life Admin': [
+          { label: 'Siri Dictation', url: 'https://www.apple.com/siri/', direct: true, icon: '🎙️' },
+          { label: 'Otter.ai', url: 'https://otter.ai', direct: true, icon: '🗣️' }
+        ]
       },
       passenger: {
         'Visual Learning': [
           { label: 'Coursera', url: 'https://www.coursera.org', direct: true, icon: '🎓' },
-          { label: 'Project Gutenberg', url: 'https://www.gutenberg.org', direct: true, icon: '📖' },
-          { label: 'Khan Academy', url: 'https://khanacademy.org', direct: true, icon: '🏫' }
+          { label: 'Project Gutenberg', url: 'https://www.gutenberg.org', direct: true, icon: '📖' }
         ],
         'Productivity': [
           { label: 'Notion', url: 'https://www.notion.so', direct: true, icon: '📝' },
-          { label: 'Trello', url: 'https://trello.com', direct: true, icon: '📋' },
-          { label: 'Admin Tools', url: 'https://docs.google.com', direct: true, icon: '💼' }
+          { label: 'Trello', url: 'https://trello.com', direct: true, icon: '📋' }
         ],
-        'Entertainment': [
-          { label: 'Tubi', url: 'https://tubitv.com', direct: true, icon: '🎬' },
-          { label: 'Pluto TV', url: 'https://pluto.tv', direct: true, icon: '📺' },
-          { label: 'Kanopy', url: 'https://www.kanopy.com', direct: true, icon: '📽️' }
-        ]
+        'Entertainment': [{ label: 'Tubi', url: 'https://tubitv.com', direct: true, icon: '🎬' }]
       }
     };
 
+    let latestNewsUrl = "https://news.google.com";
+
     function updateDateTime() {
       const now = new Date();
-      const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
-      document.getElementById('live-date').innerText = now.toLocaleDateString('en-US', options);
+      document.getElementById('live-date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
     }
     setInterval(updateDateTime, 1000);
     updateDateTime();
+
+    async function fetchTopNews() {
+      try {
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://itunes.apple.com/search?term=news&entity=podcast&limit=1')}`);
+        const data = await res.json();
+        const story = JSON.parse(data.contents).results[0];
+        document.getElementById('news-text').innerText = story.trackName;
+        latestNewsUrl = story.trackViewUrl;
+      } catch (e) {
+        document.getElementById('news-text').innerText = "Top Global Story: World Economic Forum 2026 Keynote";
+      }
+    }
+    fetchTopNews();
+
+    function fetchAndOpenNews() {
+      openLink(latestNewsUrl, document.getElementById('news-text').innerText, '📰');
+    }
 
     function toggleNightMode() {
       const b = document.body;
@@ -190,13 +203,13 @@
 
     function haptic() { if (window.navigator.vibrate) window.navigator.vibrate(20); }
 
-    function launchDevTalks() {
+    function launchTopTalks() {
       haptic();
       const island = document.getElementById('island');
       island.classList.add('active');
-      document.getElementById('island-content').innerHTML = `⚙ SCRAPING IT FEED...`;
+      document.getElementById('island-content').innerHTML = `⚙ SYNCING TOP TALKS...`;
       setTimeout(() => {
-        loadRole('driver', 'software engineering computer architecture');
+        loadRole('driver', 'global leadership and technology insights');
         setTimeout(() => island.classList.remove('active'), 1500);
       }, 1200);
     }
@@ -206,27 +219,13 @@
       const island = document.getElementById('island');
       island.classList.add('active');
       document.getElementById('island-content').innerHTML = `▶ ${title.substring(0, 12)}...`;
-      
       let history = JSON.parse(localStorage.getItem('rd_history') || '[]');
       history = history.filter(i => i.url !== url);
       history.unshift({ url, title, icon: icon || '🎧' });
       localStorage.setItem('rd_history', JSON.stringify(history.slice(0, 5)));
-      
       updateTodayUI();
       setTimeout(() => { window.open(url, '_blank'); }, 400);
       setTimeout(() => { island.classList.remove('active'); }, 5000);
-    }
-
-    function toggleBookmark(url, title, icon, e) {
-      e.stopPropagation();
-      haptic();
-      let bookmarks = JSON.parse(localStorage.getItem('rd_bookmarks') || '[]');
-      const exists = bookmarks.find(b => b.url === url);
-      if(exists) bookmarks = bookmarks.filter(b => b.url !== url);
-      else bookmarks.push({ url, title, icon });
-      localStorage.setItem('rd_bookmarks', JSON.stringify(bookmarks));
-      updateTodayUI();
-      e.target.innerText = exists ? '☆' : '★';
     }
 
     function resumeLastSession() {
@@ -237,34 +236,20 @@
 
     function updateTodayUI() {
       const history = JSON.parse(localStorage.getItem('rd_history') || '[]');
-      const bookmarks = JSON.parse(localStorage.getItem('rd_bookmarks') || '[]');
-      
       if (history.length > 0) {
         document.getElementById('resume-title').innerText = history[0].title;
         document.getElementById('resume-icon').innerText = history[0].icon;
+        const hSection = document.getElementById('history-section');
+        const hList = document.getElementById('history-list');
+        if (history.length > 1) {
+          hSection.classList.remove('hidden');
+          hList.innerHTML = history.slice(1).map(item => `
+            <div class="history-card active:scale-95 transition" onclick="openLink('${item.url}', '${item.title}', '${item.icon}')">
+              <span class="text-2xl block mb-2">${item.icon}</span>
+              <p class="text-[10px] font-bold uppercase truncate">${item.title}</p>
+            </div>`).join('');
+        }
       }
-
-      const hSection = document.getElementById('history-section');
-      const hList = document.getElementById('history-list');
-      if (history.length > 1) {
-        hSection.classList.remove('hidden');
-        hList.innerHTML = history.slice(1).map(item => `
-          <div class="history-card active:scale-95 transition" onclick="openLink('${item.url}', '${item.title}', '${item.icon}')">
-            <span class="text-2xl block mb-2">${item.icon}</span>
-            <p class="text-[10px] font-bold uppercase truncate">${item.title}</p>
-          </div>`).join('');
-      } else hSection.classList.add('hidden');
-
-      const bSection = document.getElementById('bookmark-section');
-      const bList = document.getElementById('bookmark-list');
-      if (bookmarks.length > 0) {
-        bSection.classList.remove('hidden');
-        bList.innerHTML = bookmarks.map(item => `
-          <div class="history-card active:scale-95 transition border-orange-100" onclick="openLink('${item.url}', '${item.title}', '${item.icon}')">
-            <span class="text-2xl block mb-2">${item.icon}</span>
-            <p class="text-[10px] font-bold uppercase truncate">${item.title}</p>
-          </div>`).join('');
-      } else bSection.classList.add('hidden');
     }
 
     function navToTab(id) {
@@ -288,27 +273,17 @@
       container.innerHTML = `<div class="p-8 text-center opacity-40 animate-pulse italic">Syncing live resources...</div>`;
       let finalHTML = '';
       const targets = scrapingTargets[role];
-      const bookmarks = JSON.parse(localStorage.getItem('rd_bookmarks') || '[]');
-
       for (const [cat, subCats] of Object.entries(targets)) {
         let catHTML = `<div class="card overflow-hidden mb-6"><div class="p-4 border-b border-gray-50 bg-gray-50/30 font-bold text-xs uppercase tracking-widest">${cat}</div>`;
         for (const target of subCats) {
           if (target.direct) {
-            const isBookmarked = bookmarks.find(b => b.url === target.url);
-            catHTML += `<div class="flex items-center border-b border-gray-50 last:border-0">
-              <button onclick="openLink('${target.url}', '${target.label}', '${target.icon}')" class="flex-1 h-12 px-4 text-left text-sm font-medium opacity-80 active:bg-gray-50">${target.label} ↗</button>
-              <button onclick="toggleBookmark('${target.url}', '${target.label}', '${target.icon}', event)" class="w-12 h-12 text-lg text-blue-400">${isBookmarked ? '★' : '☆'}</button>
-            </div>`;
+            catHTML += `<button onclick="openLink('${target.url}', '${target.label}', '${target.icon}')" class="w-full h-12 px-4 text-left text-sm font-medium opacity-80 active:bg-gray-50 border-b border-gray-50 last:border-0">${target.label} ↗</button>`;
           } else {
             try {
               const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://itunes.apple.com/search?term=${encodeURIComponent(target.query)}&entity=podcast&limit=2`)}`);
               const data = await res.json();
               JSON.parse(data.contents).results.forEach(item => {
-                const isBookmarked = bookmarks.find(b => b.url === item.trackViewUrl);
-                catHTML += `<div class="flex items-center border-b border-gray-50 last:border-0">
-                  <button onclick="openLink('${item.trackViewUrl}', '${item.trackName}', '${target.icon}')" class="flex-1 h-12 px-4 text-left text-xs font-medium opacity-80 active:bg-gray-50 truncate"><span>${item.trackName}</span></button>
-                  <button onclick="toggleBookmark('${item.trackViewUrl}', '${item.trackName}', '${target.icon}', event)" class="w-12 h-12 text-lg text-blue-400">${isBookmarked ? '★' : '☆'}</button>
-                </div>`;
+                catHTML += `<button onclick="openLink('${item.trackViewUrl}', '${item.trackName}', '${target.icon}')" class="w-full h-12 px-4 text-left text-xs font-medium opacity-80 active:bg-gray-50 truncate border-b border-gray-50 last:border-0"><span>${item.trackName}</span></button>`;
               });
             } catch (e) { catHTML += `<div class="p-2 text-[10px] opacity-40 italic">Offline cache only</div>`; }
           }
