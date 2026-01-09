@@ -163,8 +163,10 @@
     const scrapingTargets = {
       driver: {
         'Hands-Free Productivity': [
-          { label: 'Audiobooks', query: 'literature audiobook', icon: '📚' },
-          { label: 'Educational Podcasts', query: 'ted talks', icon: '🎙️' }
+          { label: 'Immersive Audiobooks', query: 'classic lit audiobook immersive', type: 'podcast', icon: '🎧' },
+          { label: 'Internet Archive', url: 'https://archive.org/details/audio_bookspoetry', direct: true, icon: '🏛️' },
+          { label: 'Educational Podcasts', query: 'ted talks', icon: '🎙️' },
+          { label: 'Language Transfer', query: 'language learning', icon: '🌍' }
         ],
         'Life Admin': [
           { label: 'Siri Dictation', url: 'siri://', direct: true, icon: '🎙️' },
@@ -174,19 +176,16 @@
       passenger: {
         'Visual Learning': [
           { label: 'Khan Academy', url: 'https://khanacademy.org', direct: true, icon: '🏫' },
-          { label: 'Coursera', url: 'https://www.coursera.org', direct: true, icon: '🎓' },
-          { label: 'Project Gutenberg', url: 'https://www.gutenberg.org', direct: true, icon: '📖' }
+          { label: 'Coursera', url: 'https://www.coursera.org', direct: true, icon: '🎓' }
         ],
         'Productivity': [
           { label: 'Google Suite', url: 'https://docs.google.com', direct: true, icon: '📊' },
-          { label: 'Notion', url: 'https://www.notion.so', direct: true, icon: '📝' },
-          { label: 'Trello', url: 'https://trello.com', direct: true, icon: '📋' }
+          { label: 'Notion', url: 'https://www.notion.so', direct: true, icon: '📝' }
         ],
         'Entertainment': [
           { label: 'Pluto TV', url: 'https://pluto.tv', direct: true, icon: '📺' },
           { label: 'Plex TV', url: 'https://www.plex.tv', direct: true, icon: '📼' },
-          { label: 'Kanopy', url: 'https://www.kanopy.com', direct: true, icon: '📽️' },
-          { label: 'Tubi', url: 'https://tubitv.com', direct: true, icon: '🎬' }
+          { label: 'Kanopy', url: 'https://www.kanopy.com', direct: true, icon: '📽️' }
         ]
       }
     };
@@ -209,8 +208,6 @@
     function clearSystemData() {
       if(confirm("Clear commute history and weekly progress?")) {
         localStorage.clear();
-        updateTodayUI();
-        haptic();
         location.reload();
       }
     }
@@ -237,7 +234,6 @@
       const b = document.body;
       const current = b.getAttribute('data-theme');
       b.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
-      haptic();
     }
 
     function haptic() { if (window.navigator.vibrate) window.navigator.vibrate(20); }
@@ -294,8 +290,6 @@
               <p class="text-[10px] font-bold uppercase truncate">${item.title}</p>
             </div>`).join('');
         }
-      } else {
-        document.getElementById('history-section').classList.add('hidden');
       }
     }
 
@@ -304,8 +298,8 @@
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       const isToday = id === 'screen-today';
-      document.getElementById('tab-today-btn').className = isToday ? 'flex flex-col items-center gap-1 text-blue-600 hit-target' : 'flex flex-col items-center gap-1 text-gray-400 hit-target';
-      document.getElementById('tab-explore-btn').className = !isToday ? 'flex flex-col items-center gap-1 text-blue-600 hit-target' : 'flex flex-col items-center gap-1 text-gray-400 hit-target';
+      document.getElementById('tab-today-btn').className = isToday ? 'flex flex-col items-center gap-1 text-blue-600' : 'flex flex-col items-center gap-1 text-gray-400';
+      document.getElementById('tab-explore-btn').className = !isToday ? 'flex flex-col items-center gap-1 text-blue-600' : 'flex flex-col items-center gap-1 text-gray-400';
       if(isToday) updateTodayUI();
     }
 
@@ -327,12 +321,13 @@
             catHTML += `<button onclick="openLink('${target.url}', '${target.label}', '${target.icon}')" class="w-full h-12 px-4 text-left text-sm font-medium opacity-80 active:bg-gray-50 border-b border-gray-50 last:border-0">${target.label} ↗</button>`;
           } else {
             try {
-              const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://itunes.apple.com/search?term=${encodeURIComponent(target.query)}&entity=podcast&limit=2`)}`);
+              const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://itunes.apple.com/search?term=${encodeURIComponent(target.query)}&entity=podcast&limit=10`)}`);
               const data = await res.json();
-              JSON.parse(data.contents).results.forEach(item => {
+              const items = JSON.parse(data.contents).results;
+              items.forEach(item => {
                 catHTML += `<button onclick="openLink('${item.trackViewUrl}', '${item.trackName}', '${target.icon}')" class="w-full h-12 px-4 text-left text-xs font-medium opacity-80 active:bg-gray-50 truncate border-b border-gray-50 last:border-0"><span>${item.trackName}</span></button>`;
               });
-            } catch (e) { catHTML += `<div class="p-2 text-[10px] opacity-40 italic">Offline cache only</div>`; }
+            } catch (e) { catHTML += `<div class="p-2 text-[10px] opacity-40 italic">Offline mode active</div>`; }
           }
         }
         catHTML += `</div>`;
