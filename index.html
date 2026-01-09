@@ -67,7 +67,10 @@
 
   <div id="screen-today" class="screen active">
     <div class="px-6 pt-6 flex justify-between items-center">
-      <button onclick="toggleNightMode()" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-lg shadow-sm active:scale-90 transition">🌓</button>
+      <div class="flex gap-4">
+        <button onclick="toggleNightMode()" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-lg shadow-sm active:scale-90 transition">🌓</button>
+        <button onclick="clearSystemData()" class="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-lg shadow-sm active:scale-90 transition">🗑️</button>
+      </div>
       <div id="live-clock" class="text-[10px] font-bold opacity-40 uppercase tracking-widest text-right">00:00:00 AM</div>
     </div>
     
@@ -146,11 +149,11 @@
   </div>
 
   <nav class="glass-tab fixed bottom-0 left-0 right-0 flex justify-around items-center pt-3 pb-[calc(12px+var(--safe-bottom))] z-50">
-    <button onclick="navToTab('screen-today')" id="tab-today-btn" class="flex flex-col items-center gap-1 text-blue-600">
+    <button onclick="navToTab('screen-today')" id="tab-today-btn" class="flex flex-col items-center gap-1 text-blue-600 hit-target">
       <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       <span class="text-[10px] font-bold">Home</span>
     </button>
-    <button onclick="navToTab('screen-explore')" id="tab-explore-btn" class="flex flex-col items-center gap-1 text-gray-400">
+    <button onclick="navToTab('screen-explore')" id="tab-explore-btn" class="flex flex-col items-center gap-1 text-gray-400 hit-target">
       <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 7h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
       <span class="text-[10px] font-bold">Explore</span>
     </button>
@@ -170,14 +173,21 @@
       },
       passenger: {
         'Visual Learning': [
+          { label: 'Khan Academy', url: 'https://khanacademy.org', direct: true, icon: '🏫' },
           { label: 'Coursera', url: 'https://www.coursera.org', direct: true, icon: '🎓' },
           { label: 'Project Gutenberg', url: 'https://www.gutenberg.org', direct: true, icon: '📖' }
         ],
         'Productivity': [
+          { label: 'Google Suite', url: 'https://docs.google.com', direct: true, icon: '📊' },
           { label: 'Notion', url: 'https://www.notion.so', direct: true, icon: '📝' },
           { label: 'Trello', url: 'https://trello.com', direct: true, icon: '📋' }
         ],
-        'Entertainment': [{ label: 'Tubi', url: 'https://tubitv.com', direct: true, icon: '🎬' }]
+        'Entertainment': [
+          { label: 'Pluto TV', url: 'https://pluto.tv', direct: true, icon: '📺' },
+          { label: 'Plex TV', url: 'https://www.plex.tv', direct: true, icon: '📼' },
+          { label: 'Kanopy', url: 'https://www.kanopy.com', direct: true, icon: '📽️' },
+          { label: 'Tubi', url: 'https://tubitv.com', direct: true, icon: '🎬' }
+        ]
       }
     };
 
@@ -194,6 +204,15 @@
       let hrs = (mins / 60).toFixed(1);
       document.getElementById('progress-text').innerText = `${hrs} / 5.0h`;
       document.getElementById('progress-fill').style.width = Math.min((mins / 300) * 100, 100) + '%';
+    }
+
+    function clearSystemData() {
+      if(confirm("Clear commute history and weekly progress?")) {
+        localStorage.clear();
+        updateTodayUI();
+        haptic();
+        location.reload();
+      }
     }
 
     async function fetchTopNews() {
@@ -275,6 +294,8 @@
               <p class="text-[10px] font-bold uppercase truncate">${item.title}</p>
             </div>`).join('');
         }
+      } else {
+        document.getElementById('history-section').classList.add('hidden');
       }
     }
 
@@ -283,8 +304,8 @@
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       const isToday = id === 'screen-today';
-      document.getElementById('tab-today-btn').className = isToday ? 'flex flex-col items-center gap-1 text-blue-600' : 'flex flex-col items-center gap-1 text-gray-400';
-      document.getElementById('tab-explore-btn').className = !isToday ? 'flex flex-col items-center gap-1 text-blue-600' : 'flex flex-col items-center gap-1 text-gray-400';
+      document.getElementById('tab-today-btn').className = isToday ? 'flex flex-col items-center gap-1 text-blue-600 hit-target' : 'flex flex-col items-center gap-1 text-gray-400 hit-target';
+      document.getElementById('tab-explore-btn').className = !isToday ? 'flex flex-col items-center gap-1 text-blue-600 hit-target' : 'flex flex-col items-center gap-1 text-gray-400 hit-target';
       if(isToday) updateTodayUI();
     }
 
