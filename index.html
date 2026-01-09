@@ -51,7 +51,6 @@
     .btn-toptalks { background: var(--top-talks); color: white; border-radius: 18px; font-weight: 700; transition: all 0.2s; }
     .btn-toptalks:active { transform: scale(0.96); opacity: 0.9; }
     
-    /* Progress Bar */
     .progress-container { height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden; }
     [data-theme="dark"] .progress-container { background: rgba(255,255,255,0.1); }
     .progress-fill { height: 100%; background: var(--system-blue); transition: width 1s ease-in-out; }
@@ -73,7 +72,7 @@
     </div>
     
     <div class="px-6 pt-4 pb-4">
-      <h1 class="text-3xl font-extrabold tracking-tight mb-1">Today</h1>
+      <h1 class="text-3xl font-extrabold tracking-tight mb-1">Home</h1>
       <p id="live-date" class="text-[11px] font-bold opacity-30 uppercase tracking-widest mb-2">January 9, 2026</p>
       <p class="text-xs font-medium opacity-60 italic">Transform your commute from dead time into meaningful moments.</p>
     </div>
@@ -89,9 +88,9 @@
     </div>
 
     <div class="px-6 flex-1 flex flex-col overflow-y-auto pb-32">
-      <div id="news-headline-container" class="mb-4 card p-4 border-l-4 border-blue-500 active:bg-gray-50 dark:active:bg-gray-900 transition cursor-pointer" onclick="fetchAndOpenNews()">
+      <div id="news-headline-container" class="mb-4 card p-4 !bg-[#E5E5EA] dark:!bg-[#2C2C2E] border-l-4 border-blue-500 active:bg-gray-300 dark:active:bg-gray-700 transition cursor-pointer" onclick="fetchAndOpenNews()">
         <p class="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-1">Breaking News</p>
-        <h3 id="news-text" class="text-sm font-bold leading-tight">Syncing today's top story...</h3>
+        <h3 id="news-text" class="text-sm font-bold leading-tight !text-black dark:!text-white">Syncing today's top story...</h3>
       </div>
 
       <div class="mb-8">
@@ -149,7 +148,7 @@
   <nav class="glass-tab fixed bottom-0 left-0 right-0 flex justify-around items-center pt-3 pb-[calc(12px+var(--safe-bottom))] z-50">
     <button onclick="navToTab('screen-today')" id="tab-today-btn" class="flex flex-col items-center gap-1 text-blue-600">
       <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-      <span class="text-[10px] font-bold">Today</span>
+      <span class="text-[10px] font-bold">Home</span>
     </button>
     <button onclick="navToTab('screen-explore')" id="tab-explore-btn" class="flex flex-col items-center gap-1 text-gray-400">
       <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 7h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -165,7 +164,7 @@
           { label: 'Educational Podcasts', query: 'ted talks', icon: '🎙️' }
         ],
         'Life Admin': [
-          { label: 'Siri Dictation', url: 'https://www.apple.com/siri/', direct: true, icon: '🎙️' },
+          { label: 'Siri Dictation', url: 'siri://', direct: true, icon: '🎙️' },
           { label: 'Otter.ai', url: 'https://otter.ai', direct: true, icon: '🗣️' }
         ]
       },
@@ -181,8 +180,6 @@
         'Entertainment': [{ label: 'Tubi', url: 'https://tubitv.com', direct: true, icon: '🎬' }]
       }
     };
-
-    let latestNewsUrl = "https://news.google.com";
 
     function updateDateTime() {
       const now = new Date();
@@ -205,15 +202,16 @@
         const data = await res.json();
         const story = JSON.parse(data.contents).results[0];
         document.getElementById('news-text').innerText = story.trackName;
-        latestNewsUrl = story.trackViewUrl;
+        window.latestNewsUrl = story.trackViewUrl;
       } catch (e) {
         document.getElementById('news-text').innerText = "Top Story: Digital Transformation 2026 Insights";
+        window.latestNewsUrl = "https://news.google.com";
       }
     }
     fetchTopNews();
 
     function fetchAndOpenNews() {
-      openLink(latestNewsUrl, document.getElementById('news-text').innerText, '📰');
+      openLink(window.latestNewsUrl, document.getElementById('news-text').innerText, '📰');
     }
 
     function toggleNightMode() {
@@ -247,7 +245,6 @@
       history.unshift({ url, title, icon: icon || '🎧' });
       localStorage.setItem('rd_history', JSON.stringify(history.slice(0, 5)));
       
-      // Update Goal Tracking (Assume 30 mins per session launch)
       let mins = parseInt(localStorage.getItem('rd_mins') || '0');
       localStorage.setItem('rd_mins', mins + 30);
       
