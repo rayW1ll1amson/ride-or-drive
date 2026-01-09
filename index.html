@@ -3,77 +3,168 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Ride or Drive - Professional Build</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Ride or Drive | Precision Commute</title>
   <style>
-    :root {
-      --bg: #F2F2F7; --card: #FFF; --text: #000; --blue: #007AFF; --green: #34C759; --sep: rgba(60,67,67,0.3);
-    }
-    [data-theme="dark"] {
-      --bg: #000; --card: #1C1C1E; --text: #FFF; --sep: rgba(84,84,88,0.6);
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; line-height: 1.4; }
-    .screen { display: none; min-height: 100vh; padding: env(safe-area-inset-top) 16px 40px; }
-    .screen.active { display: block; }
-    .card { background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .btn { display: block; background: var(--blue); color: #FFF; padding: 18px; border-radius: 15px; text-align: center; font-weight: 700; text-decoration: none; border: none; width: 100%; margin-top: 10px; cursor: pointer; }
-    .theme-toggle { position: absolute; top: 20px; right: 20px; background: var(--card); border: none; width: 40px; height: 40px; border-radius: 20px; font-size: 20px; }
+    :root { --bg: #F8F9FA; --card: #FFFFFF; --text: #000000; --dim: rgba(0,0,0,0.4); }
+    [data-theme="dark"] { --bg: #000000; --card: #111111; --text: #FFFFFF; --dim: rgba(255,255,255,0.4); }
+    
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); transition: 0.2s; }
+    .heading-font { font-family: 'Space Grotesk', sans-serif; }
+    .screen { display: none; min-height: 100vh; }
+    .screen.active { display: flex; flex-direction: column; }
+    
+    .card-border { border: 2px solid var(--text); box-shadow: 4px 4px 0px 0px var(--text); }
+    .tap-active:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px 0px var(--text); }
+    
+    .progress-bar { height: 8px; background: #333; border: 1px solid var(--text); }
+    .progress-fill { height: 100%; background: #FFF; width: 0%; transition: width 1s ease; }
+    [data-theme="light"] .progress-fill { background: #000; }
   </style>
 </head>
 <body data-theme="light">
-  <button class="theme-toggle" onclick="toggleT()">🌙</button>
 
-  <div id="home" class="screen active">
-    <h1 style="margin: 20px 0; font-size: 28px;">Ride or Drive</h1>
-    <div class="card" style="background: linear-gradient(135deg, #007AFF, #5AC8FA); color: #FFF;">
-      <p><b>Commute Forecast</b></p>
-      <h2 id="time">25 min trip</h2>
-      <p style="font-size: 12px; opacity: 0.8;">Clear conditions. One-click below to start.</p>
+  <div id="screen-home" class="screen active p-8">
+    <header class="mt-8 mb-10 flex justify-between items-start">
+      <div>
+        <h1 class="heading-font text-5xl font-bold tracking-tighter uppercase italic leading-none">RIDE<br><span class="opacity-30">/</span>DRIVE</h1>
+        <p class="text-[10px] tracking-[0.3em] uppercase mt-4 font-bold opacity-40">System Build v3.0</p>
+      </div>
+      <button onclick="toggleTheme()" class="card-border bg-transparent p-2 text-xl tap-active">🌙</button>
+    </header>
+
+    <div class="mb-10">
+      <div class="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2 opacity-60">
+        <span>Weekly Goal</span>
+        <span id="goal-stat">1.2 / 5.0 HRS</span>
+      </div>
+      <div class="progress-bar"><div id="goal-fill" class="progress-fill"></div></div>
     </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-      <div class="card" onclick="openR('driver')" style="text-align:center;">🚗<br><b>Driver</b></div>
-      <div class="card" onclick="openR('passenger')" style="text-align:center;">💺<br><b>Passenger</b></div>
+
+    <div id="history-section" class="mb-10 hidden">
+      <h3 class="text-[10px] font-black uppercase tracking-[0.2em] mb-4 opacity-40">Quick Resume</h3>
+      <div id="history-container" class="space-y-3"></div>
+    </div>
+    
+    <div class="space-y-6">
+      <button onclick="nav('screen-driver-cats')" class="tap-active card-border w-full bg-card p-8 flex items-center justify-between group">
+        <div class="text-left">
+          <span class="text-xs font-bold uppercase tracking-widest opacity-30">Selection A</span>
+          <h2 class="heading-font text-3xl font-bold uppercase">Driver</h2>
+        </div>
+        <span class="text-4xl grayscale group-hover:grayscale-0 transition">🚗</span>
+      </button>
+
+      <button onclick="nav('screen-passenger')" class="tap-active card-border w-full bg-card p-8 flex items-center justify-between group">
+        <div class="text-left">
+          <span class="text-xs font-bold uppercase tracking-widest opacity-30">Selection B</span>
+          <h2 class="heading-font text-3xl font-bold uppercase">Passenger</h2>
+        </div>
+        <span class="text-4xl grayscale group-hover:grayscale-0 transition">💺</span>
+      </button>
     </div>
   </div>
 
-  <div id="role" class="screen">
-    <button onclick="nav('home')" style="color:var(--blue); background:none; border:none; font-size:17px; margin-bottom:15px;">‹ Back</button>
-    <div id="content"></div>
-    <button class="btn" style="background:#FF9500" onclick="nav('reflect')">🏁 Arrived</button>
+  <div id="screen-driver-cats" class="screen p-8">
+    <button onclick="nav('screen-home')" class="mb-10 text-xs font-bold uppercase tracking-widest border-b-2 border-current inline-block">← Return</button>
+    <h2 class="heading-font text-4xl font-bold uppercase mb-8 leading-tight">Driver<br>Categories</h2>
+    
+    <div class="grid gap-6">
+      <button onclick="showSub('productivity')" class="tap-active card-border bg-card p-6 text-left">
+        <h3 class="font-bold uppercase tracking-tight text-lg">01. Productivity & Learning</h3>
+      </button>
+      <button onclick="showSub('life-admin')" class="tap-active card-border bg-card p-6 text-left">
+        <h3 class="font-bold uppercase tracking-tight text-lg">02. Life Admin & Goals</h3>
+      </button>
+      <button onclick="showSub('wellbeing')" class="tap-active card-border bg-card p-6 text-left">
+        <h3 class="font-bold uppercase tracking-tight text-lg">03. Mental Wellbeing</h3>
+      </button>
+    </div>
   </div>
 
-  <div id="reflect" class="screen">
-    <div class="card">
-      <h2>Reflection</h2>
-      <textarea id="note" style="width:100%; margin:15px 0; padding:10px; border-radius:10px;" rows="4" placeholder="What did you learn?"></textarea>
-      <button class="btn" onclick="saveL()">Save & Close</button>
+  <div id="screen-driver-sub" class="screen p-8">
+    <button onclick="nav('screen-driver-cats')" class="mb-10 text-xs font-bold uppercase tracking-widest border-b-2 border-current inline-block">← Categories</button>
+    <h2 id="sub-title" class="heading-font text-4xl font-bold uppercase mb-8 leading-tight">Option</h2>
+    <div id="sub-container" class="grid gap-6"></div>
+  </div>
+
+  <div id="screen-passenger" class="screen p-8">
+    <button onclick="nav('screen-home')" class="mb-10 text-xs font-bold uppercase tracking-widest border-b-2 border-current inline-block">← Return</button>
+    <h2 class="heading-font text-4xl font-bold uppercase mb-8">Passenger<br>Visuals</h2>
+    <div class="card-border bg-card p-8">
+      <h3 class="text-2xl font-bold heading-font uppercase italic">Visual Station</h3>
+      <a href="https://www.khanacademy.org" target="_blank" onclick="logS('Economics', '💺')" class="mt-8 block text-center bg-current text-card py-4 font-bold uppercase text-xs tracking-widest">Launch Session</a>
     </div>
   </div>
 
   <script>
+    const data = {
+      'productivity': { title: 'Productivity', items: [
+        { n: 'Immersive Audiobooks', url: 'https://librivox.org' },
+        { n: 'Educational Podcasts', url: 'https://www.npr.org/programs/ted-radio-hour/' },
+        { n: 'Audio Language Learning', url: 'https://www.languagetransfer.org' }
+      ]},
+      'life-admin': { title: 'Life Admin', items: [
+        { n: 'Voice Dictation', url: 'https://otter.ai' },
+        { n: 'Morning Role Transition', url: 'https://insighttimer.com/meditation-topics/morning' }
+      ]},
+      'wellbeing': { title: 'Wellbeing', items: [
+        { n: 'Curated Music Therapy', url: 'https://soundcloud.com/tags/ambient' },
+        { n: 'Social Connection', url: 'https://themoth.org/radio-hour' }
+      ]}
+    };
+
     function nav(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
+      if(id === 'screen-home') renderHome();
+      window.scrollTo(0,0);
     }
-    function toggleT() {
+
+    function toggleTheme() {
       const b = document.body;
-      const t = b.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      b.setAttribute('data-theme', t);
+      const current = b.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      b.setAttribute('data-theme', next);
+      localStorage.setItem('rd_theme', next);
     }
-    function openR(r) {
-      const c = document.getElementById('content');
-      if(r === 'driver') {
-        c.innerHTML = `<a href="https://freakonomics.com" target="_blank" class="btn">▶ Play Freakonomics</a>`;
-      } else {
-        c.innerHTML = `<a href="https://www.khanacademy.org" target="_blank" class="btn" style="background:var(--green)">📖 Open Khan Academy</a>`;
+
+    function showSub(k) {
+      const cat = data[k];
+      document.getElementById('sub-title').innerHTML = `${cat.title}<br>Options`;
+      document.getElementById('sub-container').innerHTML = cat.items.map(i => `
+        <a href="${i.url}" target="_blank" onclick="logS('${i.n}', '🚗')" class="tap-active card-border bg-card p-6 block no-underline font-bold uppercase text-lg tracking-tight flex justify-between">
+          <span>${i.n}</span><span>↗</span>
+        </a>`).join('');
+      nav('screen-driver-sub');
+    }
+
+    function logS(n, icon) {
+      let h = JSON.parse(localStorage.getItem('rd_h') || '[]');
+      h = h.filter(i => i.n !== n);
+      h.unshift({ n, icon, t: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+      localStorage.setItem('rd_h', JSON.stringify(h.slice(0, 3)));
+      let mins = parseInt(localStorage.getItem('rd_mins') || '0');
+      localStorage.setItem('rd_mins', mins + 30);
+    }
+
+    function renderHome() {
+      const h = JSON.parse(localStorage.getItem('rd_h') || '[]');
+      const section = document.getElementById('history-section');
+      const container = document.getElementById('history-container');
+      if(h.length > 0) {
+        section.classList.remove('hidden');
+        container.innerHTML = h.map(i => `<div class="bg-card p-4 card-border flex justify-between items-center"><h4 class="font-bold uppercase text-sm">${i.n}</h4><span class="opacity-30">${i.icon}</span></div>`).join('');
       }
-      nav('role');
+      const mins = parseInt(localStorage.getItem('rd_mins') || '0');
+      const hrs = (mins/60).toFixed(1);
+      document.getElementById('goal-stat').innerText = `${hrs} / 5.0 HRS`;
+      document.getElementById('goal-fill').style.width = Math.min((mins/300)*100, 100) + '%';
     }
-    function saveL() {
-      const n = document.getElementById('note').value;
-      if(n) { alert("Insight Saved!"); nav('home'); }
-    }
+
+    if(localStorage.getItem('rd_theme')) document.body.setAttribute('data-theme', localStorage.getItem('rd_theme'));
+    renderHome();
   </script>
 </body>
 </html>
