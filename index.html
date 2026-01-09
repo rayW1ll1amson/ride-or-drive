@@ -3,147 +3,175 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Ride or Drive</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <title>Ride or Drive | Precision Commute</title>
   <style>
-    :root { --bg: #F8F9FA; --card: #FFFFFF; --text: #000000; --dim: rgba(0,0,0,0.4); }
-    [data-theme="dark"] { --bg: #000000; --card: #111111; --text: #FFFFFF; --dim: rgba(255,255,255,0.4); }
-    body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); transition: 0.2s; overflow-x: hidden; }
-    .heading-font { font-family: 'Space Grotesk', sans-serif; }
-    .screen { display: none; min-height: 100vh; }
-    .screen.active { display: flex; flex-direction: column; }
-    .card-border { border: 2px solid var(--text); box-shadow: 4px 4px 0px 0px var(--text); }
-    .tap-active:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px 0px var(--text); }
-    .loading-shimmer { background: linear-gradient(90deg, #eeeeee 25%, #dddddd 50%, #eeeeee 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    :root {
+      --system-bg: #F2F2F7;
+      --system-blue: #007AFF;
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--system-bg);
+      color: #000;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-tab {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-top: 0.5px solid rgba(0,0,0,0.1);
+    }
+    .screen { display: none; height: 100vh; flex-direction: column; padding-top: var(--safe-top); }
+    .screen.active { display: flex; }
+    
+    /* Dynamic Island Simulator */
+    #island-container {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: center; pointer-events: none;
+    }
+    .island {
+      height: 36px; width: 124px; background: #000; border-radius: 20px;
+      margin-top: 10px; display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 12px; font-weight: 600;
+      transition: all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+    .island.active { width: 240px; height: 40px; background: #1a1a1a; }
+
+    /* Layout Components */
+    .card { background: white; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .btn-primary { background: var(--system-blue); color: white; border-radius: 14px; font-weight: 600; }
+    .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
+    .hit-target { min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; }
   </style>
 </head>
-<body data-theme="light">
+<body>
 
-  <div id="screen-home" class="screen active p-8">
-    <header class="mt-8 mb-10 flex justify-between items-start">
-      <div>
-        <h1 class="heading-font text-5xl font-bold tracking-tighter uppercase italic leading-none">RIDE<br><span class="opacity-30">/</span>DRIVE</h1>
-        <p class="text-[10px] tracking-[0.3em] uppercase mt-4 font-bold opacity-40">Live Master v5.0</p>
+  <div id="island-container">
+    <div id="island" class="island">
+      <span id="island-content">Ready</span>
+    </div>
+  </div>
+
+  <div id="screen-today" class="screen active">
+    <div class="px-6 pt-12 pb-6">
+      <h1 class="text-3xl font-extrabold tracking-tight">Today</h1>
+      <p class="text-gray-500 font-medium">Reclaim your commute</p>
+    </div>
+
+    <div class="px-6 flex-1">
+      <div class="card p-6 mb-8">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-2">Resume Session</p>
+        <h2 class="text-2xl font-bold">TED Radio Hour</h2>
+        <p class="text-sm text-gray-400 mb-6 italic">Educational Podcasts</p>
+        
+        <button onclick="oneClickLaunch('TED Radio Hour')" class="w-full h-14 btn-primary text-lg flex gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          One-Tap Start
+        </button>
       </div>
-      <button onclick="toggleTheme()" class="card-border bg-transparent p-2 text-xl tap-active">🌙</button>
-    </header>
 
-    <div class="space-y-6">
-      <button onclick="nav('screen-driver-cats')" class="tap-active card-border w-full bg-card p-8 flex items-center justify-between group">
-        <div class="text-left">
-          <span class="text-xs font-bold uppercase tracking-widest opacity-30">Selection A</span>
-          <h2 class="heading-font text-3xl font-bold uppercase">Driver</h2>
-        </div>
-        <span class="text-4xl grayscale group-hover:grayscale-0 transition">🚗</span>
-      </button>
-      <button onclick="nav('screen-passenger')" class="tap-active card-border w-full bg-card p-8 flex items-center justify-between group">
-        <div class="text-left">
-          <span class="text-xs font-bold uppercase tracking-widest opacity-30">Selection B</span>
-          <h2 class="heading-font text-3xl font-bold uppercase">Passenger</h2>
-        </div>
-        <span class="text-4xl grayscale group-hover:grayscale-0 transition">💺</span>
-      </button>
+      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-1">Quick Select</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <button onclick="navToTab('screen-explore')" class="card p-5 text-left active:bg-gray-50 transition">
+          <span class="text-3xl block mb-2">🚗</span>
+          <span class="font-bold">Driver</span>
+        </button>
+        <button onclick="oneClickLaunch('Finance Course')" class="card p-5 text-left active:bg-gray-50 transition">
+          <span class="text-3xl block mb-2">💺</span>
+          <span class="font-bold">Passenger</span>
+        </button>
+      </div>
     </div>
   </div>
 
-  <div id="screen-driver-cats" class="screen p-8">
-    <button onclick="nav('screen-home')" class="mb-10 text-xs font-bold uppercase tracking-widest border-b-2 border-current inline-block">← Return</button>
-    <h2 class="heading-font text-4xl font-bold uppercase mb-8 leading-tight">Driver<br>Categories</h2>
-    <div class="grid gap-6">
-      <button onclick="showSub('productivity')" class="tap-active card-border bg-card p-6 text-left font-bold uppercase tracking-tight text-lg">01. Productivity & Learning</button>
-      <button onclick="showSub('life-admin')" class="tap-active card-border bg-card p-6 text-left font-bold uppercase tracking-tight text-lg">02. Life Admin & Goals</button>
-      <button onclick="showSub('wellbeing')" class="tap-active card-border bg-card p-6 text-left font-bold uppercase tracking-tight text-lg">03. Mental Wellbeing</button>
+  <div id="screen-explore" class="screen">
+    <div class="px-6 pt-12 pb-4">
+      <h1 class="text-3xl font-bold tracking-tight">Explore</h1>
     </div>
+    <div class="px-4 space-y-4 overflow-y-auto pb-32" id="explore-content">
+      </div>
   </div>
 
-  <div id="screen-driver-sub" class="screen p-8">
-    <div class="flex justify-between items-center mb-10">
-      <button onclick="nav('screen-driver-cats')" class="text-xs font-bold uppercase tracking-widest border-b-2 border-current inline-block">← Back</button>
-      <button id="btn-refresh" class="text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100">↺ Refresh List</button>
-    </div>
-    <h2 id="sub-title" class="heading-font text-4xl font-bold uppercase mb-2">Fetching</h2>
-    <p class="text-[10px] uppercase tracking-widest opacity-40 mb-8">Top Free Discoveries</p>
-    <div id="content-container" class="grid gap-4"></div>
-  </div>
-
-  <div id="screen-passenger" class="screen p-8">
-    <button onclick="nav('screen-home')" class="mb-10 text-xs font-bold uppercase tracking-widest border-b-2 border-current inline-block">← Return</button>
-    <h2 class="heading-font text-4xl font-bold uppercase mb-8">Passenger<br>Visuals</h2>
-    <div class="card-border bg-card p-8 text-center">
-      <h3 class="text-2xl font-bold heading-font uppercase italic">Visual Learning Hub</h3>
-      <a href="https://www.khanacademy.org" target="_blank" class="mt-8 block bg-current text-card py-4 font-bold uppercase text-xs tracking-widest">Launch Library</a>
-    </div>
-  </div>
+  <nav class="glass-tab fixed bottom-0 left-0 right-0 flex justify-around items-center pt-3 pb-[calc(12px+var(--safe-bottom))] z-50">
+    <button onclick="navToTab('screen-today')" id="tab-today-btn" class="flex flex-col items-center gap-1 text-blue-600 hit-target">
+      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span class="text-[10px] font-bold">Today</span>
+    </button>
+    <button onclick="navToTab('screen-explore')" id="tab-explore-btn" class="flex flex-col items-center gap-1 text-gray-400 hit-target">
+      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 7h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      <span class="text-[10px] font-bold">Explore</span>
+    </button>
+  </nav>
 
   <script>
-    let activeCat = null;
-    const subCats = {
-      'productivity': [
-        { name: 'Immersive Audiobooks', api: 'https://itunes.apple.com/search?term=audiobook+literature&entity=podcast&limit=10' },
-        { name: 'Educational Podcasts', api: 'https://itunes.apple.com/search?term=ted+talks&entity=podcast&limit=10' },
-        { name: 'Audio Language Learning', api: 'https://itunes.apple.com/search?term=language+learning&entity=podcast&limit=10' }
-      ],
-      'life-admin': [
-        { name: 'Voice Dictation', url: 'https://otter.ai', desc: 'Top Tool for Transcription' },
-        { name: 'Morning Role Transition', url: 'https://insighttimer.com/meditation-topics/morning', desc: 'Curated Morning Transitions' }
-      ],
-      'wellbeing': [
-        { name: 'Curated Music Therapy', api: 'https://itunes.apple.com/search?term=ambient+lofi&entity=podcast&limit=10' },
-        { name: 'Social Connection', api: 'https://itunes.apple.com/search?term=the+moth+storytelling&entity=podcast&limit=10' }
-      ]
-    };
+    // System Haptics
+    function haptic() { if (window.navigator.vibrate) window.navigator.vibrate(15); }
 
-    function nav(id) {
+    // Dynamic Island Countdown Simulation
+    let timerInterval;
+    function startIslandTimer(name) {
+      const island = document.getElementById('island');
+      const content = document.getElementById('island-content');
+      island.classList.add('active');
+      
+      let sec = 0;
+      content.innerHTML = `<span class="text-blue-400 mr-2">●</span> ${name} 00:00`;
+      
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        sec++;
+        let m = Math.floor(sec / 60).toString().padStart(2, '0');
+        let s = (sec % 60).toString().padStart(2, '0');
+        content.innerHTML = `<span class="text-blue-400 mr-2">●</span> ${name} ${m}:${s}`;
+      }, 1000);
+    }
+
+    function oneClickLaunch(name) {
+      haptic();
+      startIslandTimer(name);
+      setTimeout(() => {
+        window.open('https://www.npr.org/programs/ted-radio-hour/', '_blank');
+      }, 400);
+    }
+
+    function navToTab(id) {
+      haptic();
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
-      window.scrollTo(0,0);
+      
+      // Update Tab Bar UI
+      const isToday = id === 'screen-today';
+      document.getElementById('tab-today-btn').classList.toggle('text-blue-600', isToday);
+      document.getElementById('tab-today-btn').classList.toggle('text-gray-400', !isToday);
+      document.getElementById('tab-explore-btn').classList.toggle('text-blue-600', !isToday);
+      document.getElementById('tab-explore-btn').classList.toggle('text-gray-400', isToday);
     }
 
-    function toggleTheme() {
-      const b = document.body;
-      b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-    }
+    // Load HIG Hierarchy
+    const categories = [
+      { n: 'Productivity', i: '🎧', sub: ['Immersive Audiobooks', 'Educational Podcasts', 'Languages'] },
+      { n: 'Life Admin', i: '🗣️', sub: ['Voice Dictation', 'Morning Transitions'] },
+      { n: 'Wellbeing', i: '🌿', sub: ['Music Therapy', 'Social Connection'] }
+    ];
 
-    async function showSub(k) {
-      activeCat = k;
-      const container = document.getElementById('content-container');
-      const title = document.getElementById('sub-title');
-      title.innerText = k.toUpperCase();
-      container.innerHTML = `<div class="h-16 loading-shimmer card-border opacity-20"></div>`.repeat(5);
-      nav('screen-driver-sub');
-      await fetchAll();
-    }
-
-    async function fetchAll() {
-      const container = document.getElementById('content-container');
-      let html = '';
-      for (let sub of subCats[activeCat]) {
-        html += `<div class="mt-4 mb-2 text-[10px] font-black uppercase tracking-widest opacity-40">${sub.name}</div>`;
-        if (sub.api) {
-          try {
-            // Using a CORS proxy for "One-Pass" web functionality
-            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(sub.api)}`);
-            const data = await res.json();
-            const items = JSON.parse(data.contents).results || [];
-            items.slice(0, 3).forEach(item => {
-              html += `
-                <a href="${item.trackViewUrl}" target="_blank" class="tap-active card-border bg-card p-4 block no-underline flex justify-between items-center mb-2">
-                  <span class="text-xs font-bold uppercase truncate pr-4">${item.trackName || "Free Resource"}</span>
-                  <span class="text-sm">↗</span>
-                </a>`;
-            });
-          } catch(e) { html += `<div class="text-[10px] opacity-50 p-4 card-border italic">Network restricted. Tap to try again.</div>`; }
-        } else {
-          html += `<a href="${sub.url}" target="_blank" class="tap-active card-border bg-card p-4 block no-underline flex justify-between items-center">
-            <span class="text-xs font-bold uppercase">${sub.name}</span><span class="text-sm">↗</span></a>`;
-        }
-      }
-      container.innerHTML = html;
-    }
-
-    document.getElementById('btn-refresh').onclick = fetchAll;
+    document.getElementById('explore-content').innerHTML = categories.map(c => `
+      <div class="card overflow-hidden">
+        <div class="p-4 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
+          <span class="text-xl">${c.i}</span><span class="font-bold text-sm uppercase tracking-tight">${c.n}</span>
+        </div>
+        ${c.sub.map(s => `
+          <button onclick="oneClickLaunch('${s}')" class="w-full h-12 px-4 text-left text-sm font-medium text-gray-700 active:bg-gray-50 flex justify-between items-center border-b border-gray-50 last:border-0">
+            ${s} <span class="text-gray-300">›</span>
+          </button>
+        `).join('')}
+      </div>
+    `).join('');
   </script>
 </body>
 </html>
